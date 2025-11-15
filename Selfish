@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Iniciar sesión</title>
+  <style>
+    :root{--bg:#f3f6fb;--card:#fff;--accent:#0f62fe;--muted:#64748b}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,var(--bg),#eef4ff);display:flex;align-items:center;justify-content:center;height:100vh;color:#0f1724}
+    .card{width:360px;background:var(--card);padding:24px;border-radius:12px;box-shadow:0 6px 20px rgba(16,24,40,0.08)}
+    h2{margin:0 0 6px;font-size:20px}
+    p.lead{margin:0 0 18px;color:var(--muted);font-size:14px}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type=text],input[type=password]{width:100%;padding:10px;border-radius:8px;border:1px solid #e6edf6;font-size:14px}
+    .field{margin-bottom:12px}
+    .row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .actions{display:flex;gap:8px}
+    button{cursor:pointer;padding:10px 14px;border-radius:8px;border:0;font-weight:600}
+    .btn-primary{background:var(--accent);color:white}
+    .btn-ghost{background:transparent;border:1px solid rgba(15,23,36,0.06)}
+    .small{font-size:13px;color:var(--muted)}
+    .error{background:#fff4f4;color:#9b1c1c;border:1px solid #ffd6d6;padding:8px;border-radius:8px;margin-bottom:10px;font-size:13px}
+    .helper{display:flex;gap:8px;align-items:center;font-size:13px}
+    .link{color:var(--accent);cursor:pointer;text-decoration:underline}
+    .center{display:flex;justify-content:center;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Iniciar sesión</h2>
+    <p class="lead">Ingresa tus credenciales para continuar.</p>
+
+    <div id="error" class="error" style="display:none"></div>
+
+    <form id="loginForm" onsubmit="return handleLogin(event)">
+      <div class="field">
+        <label for="user">Usuario</label>
+        <input id="user" name="user" type="text" placeholder="ej. admin" required />
+      </div>
+
+      <div class="field">
+        <label for="pass">Contraseña</label>
+        <div style="position:relative">
+          <input id="pass" name="pass" type="password" placeholder="" required />
+          <button type="button" id="toggle" style="position:absolute;right:6px;top:6px;border:none;background:none;cursor:pointer">👁</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <label class="helper"><input id="remember" type="checkbox" /> Recordarme</label>
+        <span class="small link" onclick="forgot()">¿Olvidaste tu contraseña?</span>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn-primary">Entrar</button>
+        <button type="button" class="btn-ghost" onclick="fillDemo()">Demo</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const CRED = { user: 'admin', pass: '1234' };
+
+    const errorEl = document.getElementById('error');
+    const passInput = document.getElementById('pass');
+    const toggleBtn = document.getElementById('toggle');
+
+    toggleBtn.addEventListener('click', () => {
+      if (passInput.type === 'password') { passInput.type = 'text'; toggleBtn.textContent = '🙈'; }
+      else { passInput.type = 'password'; toggleBtn.textContent = '👁'; }
+    });
+
+    function showError(msg){ errorEl.style.display = 'block'; errorEl.textContent = msg; }
+    function hideError(){ errorEl.style.display = 'none'; }
+
+    function handleLogin(e){
+      e.preventDefault();
+      hideError();
+      const user = document.getElementById('user').value.trim();
+      const pass = document.getElementById('pass').value;
+      const remember = document.getElementById('remember').checked;
+
+      if(user === CRED.user && pass === CRED.pass){
+        const token = btoa(user + ':' + Date.now());
+        if(remember){ localStorage.setItem('token', token); }
+        else { sessionStorage.setItem('token', token); }
+        localStorage.setItem('usuario', user);
+        window.location.href = 'dashboard.html';
+      } else {
+        showError('Usuario o contraseña incorrectos.');
+      }
+      return false;
+    }
+
+    function fillDemo(){
+      document.getElementById('user').value = CRED.user;
+      document.getElementById('pass').value = CRED.pass;
+      hideError();
+    }
+
+    function forgot(){
+      alert('Comunícate con el administrador para restablecer tu contraseña.');
+    }
+
+    (function(){
+      const tok = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if(tok){ window.location.href = 'dashboard.html'; }
+    })();
+  </script>
+</body>
+</html>
